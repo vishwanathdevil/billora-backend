@@ -30,6 +30,12 @@ public class BillController {
     public List<Bill> getBillsByUsername(@PathVariable String username) {
         return billRepository.findByUsername(username);
     }
+
+    @GetMapping("/id/{id}")
+public Bill getBillById(@PathVariable Long id) {
+    return billRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Bill not found"));
+}
 }
 
 
