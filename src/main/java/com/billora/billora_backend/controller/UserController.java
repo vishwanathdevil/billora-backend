@@ -15,20 +15,28 @@ public class UserController {
 
     // 🔥 Register User
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return userRepository.save(user);
-    }
+public String register(@RequestBody User user) {
+    System.out.println("Register API called: " + user.getUsername());
+
+    userRepository.save(user);
+
+    return "User registered successfully";
+}
 
     // 🔥 Login User
     @PostMapping("/login")
-public User login(@RequestBody User user) {
-    User existingUser = userRepository
-        .findByUsernameAndPassword(user.getUsername(), user.getPassword());
+public String login(@RequestBody User user) {
 
-    if (existingUser != null) {
-        return existingUser;
-    } else {
-        throw new RuntimeException("Invalid credentials");
+    User existingUser = userRepository.findByUsername(user.getUsername());
+
+    if (existingUser == null) {
+        return "User not found";
     }
+
+    if (!existingUser.getPassword().equals(user.getPassword())) {
+        return "Invalid password";
+    }
+
+    return "Login successful";
 }
 }
