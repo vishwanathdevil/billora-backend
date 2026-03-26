@@ -27,13 +27,18 @@ public String register(@RequestBody User user) {
     @PostMapping("/login")
 public String login(@RequestBody User user) {
 
+    if (user.getUsername() == null || user.getPassword() == null) {
+        return "Invalid input";
+    }
+
     User existingUser = userRepository.findByUsername(user.getUsername());
 
     if (existingUser == null) {
         return "User not found";
     }
 
-    if (!existingUser.getPassword().equals(user.getPassword())) {
+    if (existingUser.getPassword() == null ||
+        !existingUser.getPassword().equals(user.getPassword())) {
         return "Invalid password";
     }
 
