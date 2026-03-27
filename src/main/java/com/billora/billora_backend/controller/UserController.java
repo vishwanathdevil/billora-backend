@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
@@ -15,33 +15,42 @@ public class UserController {
 
     // 🔥 Register User
     @PostMapping("/register")
-public String register(@RequestBody User user) {
-    System.out.println("Register API called: " + user.getUsername());
+    public String register(@RequestBody User user) {
 
-    userRepository.save(user);
+        if (user == null || user.getUsername() == null || user.getPassword() == null) {
+            return "Invalid input";
+        }
 
-    return "User registered successfully";
-}
+        userRepository.save(user);
+        return "User registered successfully";
+    }
 
-    // 🔥 Login User
+    // 🔥 Login User (FIXED)
     @PostMapping("/login")
-public String login(@RequestBody User user) {
+    public String login(@RequestBody User user) {
 
-    if (user.getUsername() == null || user.getPassword() == null) {
-        return "Invalid input";
+        try {
+
+            if (user == null || user.getUsername() == null || user.getPassword() == null) {
+                return "Invalid input";
+            }
+
+            User existingUser = userRepository.findByUsername(user.getUsername());
+
+            if (existingUser == null) {
+                return "User not found";
+            }
+
+            if (existingUser.getPassword() == null ||
+                    !existingUser.getPassword().equals(user.getPassword())) {
+                return "Invalid password";
+            }
+
+            return "Login successful";
+
+        } catch (Exception e) {
+            e.printStackTrace(); // 🔥 VERY IMPORTANT
+            return "Server error";
+        }
     }
-
-    User existingUser = userRepository.findByUsername(user.getUsername());
-
-    if (existingUser == null) {
-        return "User not found";
-    }
-
-    if (existingUser.getPassword() == null ||
-        !existingUser.getPassword().equals(user.getPassword())) {
-        return "Invalid password";
-    }
-
-    return "Login successful";
-}
 }
