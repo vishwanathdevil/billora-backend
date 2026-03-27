@@ -10,7 +10,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username")   // 🔥 IMPORTANT FIX
+    @Column(name = "\"username\"")   // 🔥 IMPORTANT FIX
     private String username;
 
     @Column(name = "password")   // 🔥 IMPORTANT FIX
