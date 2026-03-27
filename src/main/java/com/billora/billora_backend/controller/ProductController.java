@@ -22,6 +22,7 @@ public class ProductController {
     // 🔥 Get product by barcode
     @GetMapping("/{code}")
     public Product getProduct(@PathVariable String code) {
-        return productRepository.findByCode(code);
+        String normalizedCode = code.replaceFirst("^0+", ""); // remove leading zeros
+        return productRepository.findByCode(normalizedCode);
     }
 }
