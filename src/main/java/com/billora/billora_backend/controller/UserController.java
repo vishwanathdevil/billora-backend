@@ -27,30 +27,48 @@ public class UserController {
 
     // 🔥 Login User (FIXED)
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
+public String login(@RequestBody User user) {
 
-        try {
+    try {
 
-            if (user == null || user.getUsername() == null || user.getPassword() == null) {
-                return "Invalid input";
-            }
+        System.out.println("LOGIN HIT: " + user);
 
-            User existingUser = userRepository.findByUsername(user.getUsername());
-
-            if (existingUser == null) {
-                return "User not found";
-            }
-
-            if (existingUser.getPassword() == null ||
-                    !existingUser.getPassword().equals(user.getPassword())) {
-                return "Invalid password";
-            }
-
-            return "Login successful";
-
-        } catch (Exception e) {
-            e.printStackTrace(); // 🔥 VERY IMPORTANT
-            return "Server error";
+        if (user == null) {
+            return "Invalid input";
         }
+
+        String username = user.getUsername();
+        String password = user.getPassword();
+
+        System.out.println("Username: " + username);
+        System.out.println("Password: " + password);
+
+        if (username == null || password == null) {
+            return "Invalid input";
+        }
+
+        // 🔥 FIX: Use safe query
+        User existingUser = userRepository.findAll()
+                .stream()
+                .filter(u -> username.equals(u.getUsername()))
+                .findFirst()
+                .orElse(null);
+
+        System.out.println("DB User: " + existingUser);
+
+        if (existingUser == null) {
+            return "User not found";
+        }
+
+        if (!password.equals(existingUser.getPassword())) {
+            return "Invalid password";
+        }
+
+        return "Login successful";
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return "Server error: " + e.getMessage(); // 🔥 shows real error
     }
+}
 }
