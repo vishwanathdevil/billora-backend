@@ -11,7 +11,7 @@ public class Product {
     private Long id;
 
     private String name;
-    @Column(name = "\"code\"")   // 🔥 IMPORTANT FIX
+    @Column(name = "code")   // 🔥 IMPORTANT FIX
     private String code;
     private double price;
 
