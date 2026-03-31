@@ -1,9 +1,14 @@
 package com.billora.billora_backend.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.billora.billora_backend.entity.User;
 import com.billora.billora_backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -15,60 +20,36 @@ public class UserController {
 
     // 🔥 Register User
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
+public User register(@RequestBody User user) {
 
-        if (user == null || user.getUsername() == null || user.getPassword() == null) {
-            return "Invalid input";
-        }
-
-        userRepository.save(user);
-        return "User registered successfully";
+    if (user == null || user.getUsername() == null || user.getPassword() == null) {
+        throw new RuntimeException("Invalid input");
     }
+
+    // ✅ Set default role
+    user.setRole("CUSTOMER");
+
+    return userRepository.save(user); // ✅ return full object
+}
 
     // 🔥 Login User (FIXED)
     @PostMapping("/login")
-public String login(@RequestBody User user) {
+public User login(@RequestBody User user) {
 
-    try {
-
-        System.out.println("LOGIN HIT: " + user);
-
-        if (user == null) {
-            return "Invalid input";
-        }
-
-        String username = user.getUsername();
-        String password = user.getPassword();
-
-        System.out.println("Username: " + username);
-        System.out.println("Password: " + password);
-
-        if (username == null || password == null) {
-            return "Invalid input";
-        }
-
-        // 🔥 FIX: Use safe query
-        User existingUser = userRepository.findAll()
-                .stream()
-                .filter(u -> username.equals(u.getUsername()))
-                .findFirst()
-                .orElse(null);
-
-        System.out.println("DB User: " + existingUser);
-
-        if (existingUser == null) {
-            return "User not found";
-        }
-
-        if (!password.equals(existingUser.getPassword())) {
-            return "Invalid password";
-        }
-
-        return "Login successful";
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        return "Server error: " + e.getMessage(); // 🔥 shows real error
+    if (user.getUsername() == null || user.getPassword() == null) {
+        throw new RuntimeException("Invalid input");
     }
+
+    User existingUser = userRepository.findByUsername(user.getUsername());
+
+    if (existingUser == null) {
+        throw new RuntimeException("User not found");
+    }
+
+    if (!existingUser.getPassword().equals(user.getPassword())) {
+        throw new RuntimeException("Invalid password");
+    }
+
+    return existingUser; // ✅ JSON response
 }
 }

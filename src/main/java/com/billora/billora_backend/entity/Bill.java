@@ -18,8 +18,10 @@ public class Bill {
     private String username;
     private double total;
 
+    private String status; // ✅ NEW
+
     @ElementCollection
-    private List<String> items; // simple product names
+    private List<String> items;
 
     // getters & setters
     public Long getId() { return id; }
@@ -32,4 +34,7 @@ public class Bill {
 
     public List<String> getItems() { return items; }
     public void setItems(List<String> items) { this.items = items; }
+
+    public String getStatus() { return status; }              // ✅ NEW
+    public void setStatus(String status) { this.status = status; } // ✅ NEW
 }

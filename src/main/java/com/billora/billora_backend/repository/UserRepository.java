@@ -1,7 +1,8 @@
 package com.billora.billora_backend.repository;
 
-import com.billora.billora_backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.billora.billora_backend.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
