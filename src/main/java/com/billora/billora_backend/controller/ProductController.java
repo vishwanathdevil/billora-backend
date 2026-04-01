@@ -59,10 +59,17 @@ public class ProductController {
     @GetMapping("/{code}")
 public ResponseEntity<?> getProduct(
         @PathVariable String code,
-        @RequestParam Long storeId
-) {
+        @RequestParam Long storeId) {
 
+    // 🔥 normalize BOTH formats
+    String normalizedCode = code.replaceFirst("^0+", "");
+
+    // 🔥 try BOTH
     Product product = productRepository.findByCodeAndStoreId(code, storeId);
+
+    if (product == null) {
+        product = productRepository.findByCodeAndStoreId(normalizedCode, storeId);
+    }
 
     if (product == null) {
         return ResponseEntity.status(404).body("Product not found");
