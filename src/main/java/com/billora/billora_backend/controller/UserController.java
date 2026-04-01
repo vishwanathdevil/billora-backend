@@ -26,8 +26,10 @@ public User register(@RequestBody User user) {
         throw new RuntimeException("Invalid input");
     }
 
-    // ✅ Set default role
-    user.setRole("CUSTOMER");
+    // ✅ Use given role or set default role
+    if(user.getRole() == null) {
+        user.setRole("CUSTOMER");
+    }
 
     return userRepository.save(user); // ✅ return full object
 }
