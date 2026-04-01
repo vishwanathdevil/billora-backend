@@ -33,25 +33,41 @@ public class ProductController {
     }
 
     // ✅ Get product by barcode + storeId
+    // @GetMapping("/{code}")
+    // public ResponseEntity<?> getProduct(
+    //         @PathVariable String code,
+    //         @RequestParam(required = false) Long storeId) {
+
+    //     String normalizedCode = code.replaceFirst("^0+", "");
+
+    //     Product product;
+
+    //     if (storeId != null) {
+    //         product = productRepository.findByCodeAndStoreId(normalizedCode, storeId);
+    //     } else {
+    //         product = productRepository.findByCode(normalizedCode);
+    //     }
+
+    //     if (product == null) {
+    //         return ResponseEntity.status(404).body("Product not found");
+    //     }
+
+    //     return ResponseEntity.ok(product);
+    // }
+
+
     @GetMapping("/{code}")
-    public ResponseEntity<?> getProduct(
-            @PathVariable String code,
-            @RequestParam(required = false) Long storeId) {
+public ResponseEntity<?> getProduct(
+        @PathVariable String code,
+        @RequestParam Long storeId
+) {
 
-        String normalizedCode = code.replaceFirst("^0+", "");
+    Product product = productRepository.findByCodeAndStoreId(code, storeId);
 
-        Product product;
-
-        if (storeId != null) {
-            product = productRepository.findByCodeAndStoreId(normalizedCode, storeId);
-        } else {
-            product = productRepository.findByCode(normalizedCode);
-        }
-
-        if (product == null) {
-            return ResponseEntity.status(404).body("Product not found");
-        }
-
-        return ResponseEntity.ok(product);
+    if (product == null) {
+        return ResponseEntity.status(404).body("Product not found");
     }
+
+    return ResponseEntity.ok(product);
+}
 }
