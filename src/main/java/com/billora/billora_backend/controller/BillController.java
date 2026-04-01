@@ -50,12 +50,15 @@ public class BillController {
     }
 
     // ✅ 5. MARK BILL AS PAID (Cashier Action)
-    @PutMapping("/{id}/pay")
-    public Bill markAsPaid(@PathVariable Long id) {
-        Bill bill = billRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bill not found"));
+    @PutMapping("/{id}/pay/{mode}")
+public Bill markAsPaid(@PathVariable Long id, @PathVariable String mode) {
 
-        bill.setStatus("PAID");
-        return billRepository.save(bill);
-    }
+    Bill bill = billRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Bill not found"));
+
+    bill.setStatus("PAID");
+    bill.setPaymentMode(mode);
+
+    return billRepository.save(bill);
+}
 }

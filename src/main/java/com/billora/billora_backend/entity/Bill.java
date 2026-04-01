@@ -19,6 +19,7 @@ public class Bill {
     private double total;
 
     private String status; // ✅ NEW
+    private String paymentMode; // UPI / CASH
 
     @ElementCollection
     private List<String> items;
@@ -37,4 +38,12 @@ public class Bill {
 
     public String getStatus() { return status; }              // ✅ NEW
     public void setStatus(String status) { this.status = status; } // ✅ NEW
+
+    public String getPaymentMode() {
+    return paymentMode;
+}
+
+public void setPaymentMode(String paymentMode) {
+    this.paymentMode = paymentMode;
+}
 }
