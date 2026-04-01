@@ -70,4 +70,21 @@ public ResponseEntity<?> getProduct(
 
     return ResponseEntity.ok(product);
 }
+@DeleteMapping("/{id}")
+public void deleteProduct(@PathVariable Long id) {
+    productRepository.deleteById(id);
+}
+
+@PutMapping("/{id}")
+public Product updateProduct(@PathVariable Long id, @RequestBody Product updated) {
+
+    Product p = productRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Not found"));
+
+    p.setName(updated.getName());
+    p.setPrice(updated.getPrice());
+    p.setCode(updated.getCode());
+
+    return productRepository.save(p);
+}
 }
