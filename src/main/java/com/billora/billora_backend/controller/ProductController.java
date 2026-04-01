@@ -6,32 +6,52 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "*")  // 🔥 CORS FIX
+@CrossOrigin(origins = "*")
 public class ProductController {
 
     @Autowired
     private ProductRepository productRepository;
 
-    // 🔥 Add product (for testing)
+    // ✅ Add product
     @PostMapping("/add")
     public Product addProduct(@RequestBody Product product) {
         return productRepository.save(product);
     }
 
-    // 🔥 Get product by barcode
-    @GetMapping("/{code}")
-public ResponseEntity<?> getProduct(@PathVariable String code) {
-
-    String normalizedCode = code.replaceFirst("^0+", "");
-
-    Product product = productRepository.findByCode(normalizedCode);
-
-    if (product == null) {
-        return ResponseEntity.status(404).body("Product not found");
+    // ✅ Get all products (with store filter)
+    @GetMapping
+    public List<Product> getProducts(@RequestParam(required = false) Long storeId) {
+        if (storeId != null) {
+            return productRepository.findByStoreId(storeId);
+        } else {
+            return productRepository.findAll();
+        }
     }
 
-    return ResponseEntity.ok(product);
-}
+    // ✅ Get product by barcode + storeId
+    @GetMapping("/{code}")
+    public ResponseEntity<?> getProduct(
+            @PathVariable String code,
+            @RequestParam(required = false) Long storeId) {
+
+        String normalizedCode = code.replaceFirst("^0+", "");
+
+        Product product;
+
+        if (storeId != null) {
+            product = productRepository.findByCodeAndStoreId(normalizedCode, storeId);
+        } else {
+            product = productRepository.findByCode(normalizedCode);
+        }
+
+        if (product == null) {
+            return ResponseEntity.status(404).body("Product not found");
+        }
+
+        return ResponseEntity.ok(product);
+    }
 }

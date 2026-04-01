@@ -20,6 +20,7 @@ public class Bill {
 
     private String status; // ✅ NEW
     private String paymentMode; // UPI / CASH
+    private Long storeId; // ✅ NEW
 
     @ElementCollection
     private List<String> items;
@@ -40,10 +41,15 @@ public class Bill {
     public void setStatus(String status) { this.status = status; } // ✅ NEW
 
     public String getPaymentMode() {
-    return paymentMode;
-}
+    return paymentMode;}
 
-public void setPaymentMode(String paymentMode) {
-    this.paymentMode = paymentMode;
-}
+    public void setPaymentMode(String paymentMode) {
+    this.paymentMode = paymentMode;}
+
+    public Long getStoreId() {
+        return storeId;}
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;}
+        
 }

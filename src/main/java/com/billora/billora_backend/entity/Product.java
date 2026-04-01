@@ -14,7 +14,7 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private Long storeId; // ✅ NEW
     private String name;
     @Column(name = "code")   // 🔥 IMPORTANT FIX
     private String code;
@@ -31,4 +31,11 @@ public class Product {
 
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
 }

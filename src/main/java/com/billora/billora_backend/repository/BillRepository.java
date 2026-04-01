@@ -9,4 +9,5 @@ import com.billora.billora_backend.entity.Bill;
 public interface BillRepository extends JpaRepository<Bill, Long> {
 
     List<Bill> findByUsername(String username);
+    List<Bill> findByStoreId(Long storeId);
 }

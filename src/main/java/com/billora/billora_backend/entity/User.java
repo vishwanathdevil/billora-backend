@@ -24,6 +24,9 @@ public class User {
     @Column(name = "role")           // ✅ NEW
     private String role;             // CUSTOMER / CASHIER
 
+    @Column(name = "store_id")       // ✅ NEW
+    private Long storeId;             // For CASHIER role
+
     public Long getId() {
         return id;
     }
@@ -51,5 +54,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 }
