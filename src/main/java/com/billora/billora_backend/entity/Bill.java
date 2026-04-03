@@ -18,38 +18,74 @@ public class Bill {
     private String username;
     private double total;
 
-    private String status; // ✅ NEW
-    private String paymentMode; // UPI / CASH
-    private Long storeId; // ✅ NEW
+    private String status;        // PENDING / PAID
+    private String paymentMode;   // UPI / CASH
+    private String paymentId;     // 🔥 NEW (IMPORTANT)
+
+    private Long storeId;
 
     @ElementCollection
     private List<String> items;
 
-    // getters & setters
-    public Long getId() { return id; }
+    // ================= GETTERS & SETTERS =================
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public Long getId() {
+        return id;
+    }
 
-    public double getTotal() { return total; }
-    public void setTotal(double total) { this.total = total; }
+    public String getUsername() {
+        return username;
+    }
 
-    public List<String> getItems() { return items; }
-    public void setItems(List<String> items) { this.items = items; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public String getStatus() { return status; }              // ✅ NEW
-    public void setStatus(String status) { this.status = status; } // ✅ NEW
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public List<String> getItems() {
+        return items;
+    }
+
+    public void setItems(List<String> items) {
+        this.items = items;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getPaymentMode() {
-    return paymentMode;}
+        return paymentMode;
+    }
 
     public void setPaymentMode(String paymentMode) {
-    this.paymentMode = paymentMode;}
+        this.paymentMode = paymentMode;
+    }
+
+    public String getPaymentId() {        // 🔥 NEW
+        return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {  // 🔥 NEW
+        this.paymentId = paymentId;
+    }
 
     public Long getStoreId() {
-        return storeId;}
+        return storeId;
+    }
 
     public void setStoreId(Long storeId) {
-        this.storeId = storeId;}
-        
+        this.storeId = storeId;
+    }
 }
