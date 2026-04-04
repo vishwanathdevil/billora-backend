@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,19 +26,37 @@ import com.razorpay.RazorpayException;
 @RestController
 @RequestMapping("/api/payment")
 @CrossOrigin(origins = "*")
-
 public class RazorpayController {
 
     private static final String KEY = "rzp_test_SYKrnMrPo4MNDv";
     private static final String SECRET = "m6CNw09oCNSsWeRvZXS8D8QR";
 
     @Autowired
-private BillRepository billRepository;
+    private BillRepository billRepository;
 
-@Autowired
-private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
+    // ===============================
+    // ✅ START PAYMENT (🔥 IMPORTANT)
+    // ===============================
+    @PostMapping("/start/{billId}")
+    public void startPayment(@PathVariable Long billId) {
+
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Bill not found"));
+
+        bill.setStatus("PAYMENT_PENDING");
+
+        billRepository.save(bill);
+
+        // 🔥 notify customer
+        messagingTemplate.convertAndSend("/topic/bills", bill);
+    }
+
+    // ===============================
     // ✅ CREATE ORDER
+    // ===============================
     @PostMapping("/create-order")
     public Map<String, Object> createOrder(@RequestBody Map<String, Object> data) throws RazorpayException {
 
@@ -45,7 +65,7 @@ private SimpMessagingTemplate messagingTemplate;
         RazorpayClient client = new RazorpayClient(KEY, SECRET);
 
         JSONObject options = new JSONObject();
-        options.put("amount", amount * 100); // in paise
+        options.put("amount", amount * 100);
         options.put("currency", "INR");
         options.put("receipt", "txn_" + System.currentTimeMillis());
 
@@ -59,50 +79,54 @@ private SimpMessagingTemplate messagingTemplate;
         return response;
     }
 
-    // ✅ VERIFY PAYMENT (VERY IMPORTANT)
+    // ===============================
+    // ✅ VERIFY PAYMENT
+    // ===============================
     @PostMapping("/verify")
-public Map<String, Object> verifyPayment(@RequestBody Map<String, String> data) {
+    public Map<String, Object> verifyPayment(@RequestBody Map<String, String> data) {
 
-    String orderId = data.get("razorpay_order_id");
-    String paymentId = data.get("razorpay_payment_id");
-    String signature = data.get("razorpay_signature");
-    String billIdStr = data.get("billId");
+        String orderId = data.get("razorpay_order_id");
+        String paymentId = data.get("razorpay_payment_id");
+        String signature = data.get("razorpay_signature");
+        String billIdStr = data.get("billId");
 
-    Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
 
-    try {
-        String generatedSignature = hmacSHA256(orderId + "|" + paymentId, SECRET);
+        try {
+            String generatedSignature = hmacSHA256(orderId + "|" + paymentId, SECRET);
 
-        if (generatedSignature.equals(signature)) {
+            if (generatedSignature.equals(signature)) {
 
-            Long billId = Long.parseLong(billIdStr);
+                Long billId = Long.parseLong(billIdStr);
 
-            Bill bill = billRepository.findById(billId)
-                    .orElseThrow(() -> new RuntimeException("Bill not found"));
+                Bill bill = billRepository.findById(billId)
+                        .orElseThrow(() -> new RuntimeException("Bill not found"));
 
-            bill.setStatus("PAID");
-            bill.setPaymentId(paymentId);
-            bill.setPaymentMode("UPI");
+                bill.setStatus("PAID");
+                bill.setPaymentId(paymentId);
+                bill.setPaymentMode("UPI");
 
-            billRepository.save(bill);
+                billRepository.save(bill);
 
-            // 🔥 REALTIME UPDATE
-            messagingTemplate.convertAndSend("/topic/bills", bill);
+                // 🔥 notify cashier
+                messagingTemplate.convertAndSend("/topic/bills", bill);
 
-            response.put("status", "success");
+                response.put("status", "success");
 
-        } else {
-            response.put("status", "failed");
+            } else {
+                response.put("status", "failed");
+            }
+
+        } catch (Exception e) {
+            response.put("status", "error");
         }
 
-    } catch (Exception e) {
-        response.put("status", "error");
+        return response;
     }
 
-    return response;
-}
-
-    // ✅ HMAC SHA256 SIGNATURE GENERATOR
+    // ===============================
+    // ✅ SIGNATURE
+    // ===============================
     private String hmacSHA256(String data, String key) throws Exception {
 
         Mac mac = Mac.getInstance("HmacSHA256");
@@ -121,4 +145,9 @@ public Map<String, Object> verifyPayment(@RequestBody Map<String, String> data) 
 
         return hex.toString();
     }
+    @GetMapping("/test")
+public String testApi() {
+    return "WORKING";
 }
+}
+
