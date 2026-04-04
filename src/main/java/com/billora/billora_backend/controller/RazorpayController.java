@@ -66,40 +66,37 @@ public Map<String, Object> verifyPayment(@RequestBody Map<String, String> data) 
     String orderId = data.get("razorpay_order_id");
     String paymentId = data.get("razorpay_payment_id");
     String signature = data.get("razorpay_signature");
-    String billIdStr = data.get("billId"); // 🔥 coming from frontend
+    String billIdStr = data.get("billId");
 
     Map<String, Object> response = new HashMap<>();
 
     try {
-        // 🔥 generate signature
         String generatedSignature = hmacSHA256(orderId + "|" + paymentId, SECRET);
 
         if (generatedSignature.equals(signature)) {
 
-            // ✅ UPDATE BILL STATUS = PAID
-            if (billIdStr != null) {
-                Long billId = Long.parseLong(billIdStr);
+            Long billId = Long.parseLong(billIdStr);
 
-                // 🔥 you must have BillRepository
-                Bill bill = billRepository.findById(billId)
-                        .orElseThrow(() -> new RuntimeException("Bill not found"));
+            Bill bill = billRepository.findById(billId)
+                    .orElseThrow(() -> new RuntimeException("Bill not found"));
 
-                bill.setStatus("PAID");
-                bill.setPaymentId(paymentId);
-                billRepository.save(bill);
-            }
+            bill.setStatus("PAID");
+            bill.setPaymentId(paymentId);
+            bill.setPaymentMode("UPI");
+
+            billRepository.save(bill);
+
+            // 🔥 REALTIME UPDATE
+            messagingTemplate.convertAndSend("/topic/bills", bill);
 
             response.put("status", "success");
-            response.put("message", "Payment verified ✅");
 
         } else {
             response.put("status", "failed");
-            response.put("message", "Invalid signature ❌");
         }
 
     } catch (Exception e) {
         response.put("status", "error");
-        response.put("message", "Verification error ❌");
     }
 
     return response;

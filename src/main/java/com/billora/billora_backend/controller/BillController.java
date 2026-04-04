@@ -1,9 +1,15 @@
 package com.billora.billora_backend.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.billora.billora_backend.entity.Bill;
 import com.billora.billora_backend.repository.BillRepository;
@@ -16,6 +22,9 @@ public class BillController {
     @Autowired
     private BillRepository billRepository;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     // ✅ SAVE BILL
     @PostMapping
     public Bill saveBill(@RequestBody Bill bill) {
@@ -23,16 +32,20 @@ public class BillController {
         return billRepository.save(bill);
     }
 
-    // ✅ GET ALL BILLS
-    @GetMapping
-    public List<Bill> getAllBills() {
-        return billRepository.findAll();
-    }
+    // ✅ START PAYMENT (Cashier approval)
+    @PutMapping("/{id}/start-payment")
+    public Bill startPayment(@PathVariable Long id) {
 
-    // ✅ GET BILLS BY USERNAME
-    @GetMapping("/user/{username}")
-    public List<Bill> getBillsByUsername(@PathVariable String username) {
-        return billRepository.findByUsername(username);
+        Bill bill = billRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bill not found"));
+
+        bill.setStatus("WAITING");
+
+        Bill updated = billRepository.save(bill);
+
+        messagingTemplate.convertAndSend("/topic/bills", updated);
+
+        return updated;
     }
 
     // ✅ GET BILL BY ID
@@ -40,18 +53,5 @@ public class BillController {
     public Bill getBillById(@PathVariable Long id) {
         return billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bill not found"));
-    }
-
-    // ✅ MARK BILL AS PAID (UPI / CASH)
-    @PutMapping("/{id}/pay/{mode}")
-    public Bill markAsPaid(@PathVariable Long id, @PathVariable String mode) {
-
-        Bill bill = billRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bill not found"));
-
-        bill.setStatus("PAID");
-        bill.setPaymentMode(mode);
-
-        return billRepository.save(bill);
     }
 }
