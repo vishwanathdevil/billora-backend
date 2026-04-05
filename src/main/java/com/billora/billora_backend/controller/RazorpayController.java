@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.billora.billora_backend.entity.Bill;
+import com.billora.billora_backend.entity.Product;
 import com.billora.billora_backend.repository.BillRepository;
+import com.billora.billora_backend.repository.ProductRepository;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
@@ -36,6 +38,9 @@ public class RazorpayController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     // ===============================
     // ✅ START PAYMENT (🔥 IMPORTANT)
@@ -83,46 +88,73 @@ public class RazorpayController {
     // ✅ VERIFY PAYMENT
     // ===============================
     @PostMapping("/verify")
-    public Map<String, Object> verifyPayment(@RequestBody Map<String, String> data) {
+public Map<String, Object> verifyPayment(@RequestBody Map<String, String> data) {
 
-        String orderId = data.get("razorpay_order_id");
-        String paymentId = data.get("razorpay_payment_id");
-        String signature = data.get("razorpay_signature");
-        String billIdStr = data.get("billId");
+    String orderId = data.get("razorpay_order_id");
+    String paymentId = data.get("razorpay_payment_id");
+    String signature = data.get("razorpay_signature");
+    String billIdStr = data.get("billId");
 
-        Map<String, Object> response = new HashMap<>();
+    Map<String, Object> response = new HashMap<>();
 
-        try {
-            String generatedSignature = hmacSHA256(orderId + "|" + paymentId, SECRET);
+    try {
+        String generatedSignature = hmacSHA256(orderId + "|" + paymentId, SECRET);
 
-            if (generatedSignature.equals(signature)) {
+        if (generatedSignature.equals(signature)) {
 
-                Long billId = Long.parseLong(billIdStr);
+            Long billId = Long.parseLong(billIdStr);
 
-                Bill bill = billRepository.findById(billId)
-                        .orElseThrow(() -> new RuntimeException("Bill not found"));
+            Bill bill = billRepository.findById(billId)
+                    .orElseThrow(() -> new RuntimeException("Bill not found"));
 
-                bill.setStatus("PAID");
-                bill.setPaymentId(paymentId);
-                bill.setPaymentMode("UPI");
+            // ===============================
+            // UPDATE BILL
+            // ===============================
+            bill.setStatus("PAID");
+            bill.setPaymentId(paymentId);
+            bill.setPaymentMode("UPI");
 
-                billRepository.save(bill);
+            billRepository.save(bill);
 
-                // 🔥 notify cashier
-                messagingTemplate.convertAndSend("/topic/bills", bill);
+            // ===============================
+            // 🔥 STOCK REDUCTION
+            // ===============================
+            if (bill.getItems() != null) {
 
-                response.put("status", "success");
+                for (String itemName : bill.getItems()) {
 
-            } else {
-                response.put("status", "failed");
+                    Product product = productRepository
+                            .findByNameAndStoreId(itemName, bill.getStoreId());
+
+                    if (product != null) {
+
+                        int stock = product.getStock();
+
+                        if (stock > 0) {
+                            product.setStock(stock - 1);
+                            productRepository.save(product);
+                        }
+                    }
+                }
             }
 
-        } catch (Exception e) {
-            response.put("status", "error");
+            // ===============================
+            // 🔥 WEBSOCKET UPDATE
+            // ===============================
+            messagingTemplate.convertAndSend("/topic/bills", bill);
+
+            response.put("status", "success");
+
+        } else {
+            response.put("status", "failed");
         }
 
-        return response;
+    } catch (Exception e) {
+        response.put("status", "error");
     }
+
+    return response;
+}
 
     // ===============================
     // ✅ SIGNATURE

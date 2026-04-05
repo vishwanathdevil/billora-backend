@@ -19,6 +19,7 @@ public class Product {
     @Column(name = "code")   // 🔥 IMPORTANT FIX
     private String code;
     private double price;
+    private int stock;
 
     // getters & setters
     public Long getId() { return id; }
@@ -38,4 +39,7 @@ public class Product {
     public void setStoreId(Long storeId) {
         this.storeId = storeId;
     }
+
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 }

@@ -28,13 +28,22 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-    // ✅ Add product
+    // ===============================
+    // ADD PRODUCT
+    // ===============================
     @PostMapping("/add")
     public Product addProduct(@RequestBody Product product) {
+
+        if (product.getStock() == 0) {
+            product.setStock(100); // default stock
+        }
+
         return productRepository.save(product);
     }
 
-    // ✅ Get all products (with store filter)
+    // ===============================
+    // GET PRODUCTS
+    // ===============================
     @GetMapping
     public List<Product> getProducts(@RequestParam(required = false) Long storeId) {
         return (storeId != null)
@@ -42,7 +51,9 @@ public class ProductController {
                 : productRepository.findAll();
     }
 
-    // ✅ Get product by barcode + storeId
+    // ===============================
+    // SCAN PRODUCT (MAIN API)
+    // ===============================
     @GetMapping("/{code}")
     public ResponseEntity<?> getProduct(
             @PathVariable String code,
@@ -51,21 +62,23 @@ public class ProductController {
         try {
             String normalizedCode = code.replaceFirst("^0+", "");
 
-            // 1️⃣ Try DB (original code)
             Product product = productRepository.findByCodeAndStoreId(code, storeId);
 
-            // 2️⃣ Try normalized code
             if (product == null) {
                 product = productRepository.findByCodeAndStoreId(normalizedCode, storeId);
             }
 
-            // 3️⃣ Try external API
             if (product == null) {
                 product = fetchFromOpenFoodFacts(code, storeId);
             }
 
             if (product == null) {
                 return ResponseEntity.status(404).body("Product not found");
+            }
+
+            // 🔥 CHECK STOCK
+            if (product.getStock() <= 0) {
+                return ResponseEntity.status(400).body("Out of stock ❌");
             }
 
             return ResponseEntity.ok(product);
@@ -75,14 +88,9 @@ public class ProductController {
         }
     }
 
-    // ✅ Delete product
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
-        productRepository.deleteById(id);
-        return ResponseEntity.ok("Deleted successfully");
-    }
-
-    // ✅ Update product
+    // ===============================
+    // UPDATE PRODUCT
+    // ===============================
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody Product updated) {
 
@@ -92,11 +100,23 @@ public class ProductController {
         p.setName(updated.getName());
         p.setPrice(updated.getPrice());
         p.setCode(updated.getCode());
+        p.setStock(updated.getStock());
 
         return ResponseEntity.ok(productRepository.save(p));
     }
 
-    // ✅ FETCH FROM OPEN FOOD FACTS
+    // ===============================
+    // DELETE
+    // ===============================
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        productRepository.deleteById(id);
+        return ResponseEntity.ok("Deleted successfully");
+    }
+
+    // ===============================
+    // EXTERNAL API (AUTO PRODUCT ADD)
+    // ===============================
     public Product fetchFromOpenFoodFacts(String code, Long storeId) {
         try {
             String url = "https://world.openfoodfacts.org/api/v0/product/" + code + ".json";
@@ -117,8 +137,9 @@ public class ProductController {
             Product p = new Product();
             p.setCode(code);
             p.setName(name != null && !name.isEmpty() ? name : "Unknown Product");
-            p.setPrice(50.0); // 🔥 TODO: dynamic pricing later
+            p.setPrice(50.0);
             p.setStoreId(storeId);
+            p.setStock(50); // 🔥 default stock
 
             return productRepository.save(p);
 
