@@ -137,9 +137,9 @@ public class ProductController {
             Product p = new Product();
             p.setCode(code);
             p.setName(name != null && !name.isEmpty() ? name : "Unknown Product");
-            p.setPrice(50.0);
+            p.setPrice(0);
             p.setStoreId(storeId);
-            p.setStock(50); // 🔥 default stock
+            p.setStock(5); // 🔥 default stock
 
             return productRepository.save(p);
 
