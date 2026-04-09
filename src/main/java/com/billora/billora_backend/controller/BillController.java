@@ -31,7 +31,18 @@ public class BillController {
     @PostMapping
     public Bill saveBill(@RequestBody Bill bill) {
         bill.setStatus("PENDING");
-        return billRepository.save(bill);
+
+// 🔥 Calculate total safely
+double total = 0;
+if (bill.getItems() != null) {
+    for (var item : bill.getItems()) {
+        total += item.getPrice() * item.getQuantity();
+    }
+}
+
+bill.setTotal(total);
+
+return billRepository.save(bill);
     }
 
     // ✅ START PAYMENT

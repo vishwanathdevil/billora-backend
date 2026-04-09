@@ -25,7 +25,7 @@ public class Bill {
     private Long storeId;
 
     @ElementCollection
-    private List<String> items;
+    private List<CartItem> items;
 
     // ================= GETTERS & SETTERS =================
 
@@ -49,11 +49,11 @@ public class Bill {
         this.total = total;
     }
 
-    public List<String> getItems() {
+    public List<CartItem> getItems() {
         return items;
     }
 
-    public void setItems(List<String> items) {
+    public void setItems(List<CartItem> items) {
         this.items = items;
     }
 

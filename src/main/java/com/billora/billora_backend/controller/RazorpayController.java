@@ -1,4 +1,5 @@
 package com.billora.billora_backend.controller;
+import com.billora.billora_backend.entity.CartItem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -121,17 +122,17 @@ public Map<String, Object> verifyPayment(@RequestBody Map<String, String> data) 
             // ===============================
             if (bill.getItems() != null) {
 
-                for (String itemName : bill.getItems()) {
+                for (CartItem item : bill.getItems()) {
 
                     Product product = productRepository
-                            .findByNameAndStoreId(itemName, bill.getStoreId());
+                            .findByNameAndStoreId(item.getName(), bill.getStoreId());
 
                     if (product != null) {
 
                         int stock = product.getStock();
 
                         if (stock > 0) {
-                            product.setStock(stock - 1);
+                            product.setStock(stock - item.getQuantity());
                             productRepository.save(product);
                         }
                     }
