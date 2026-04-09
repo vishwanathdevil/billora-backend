@@ -15,7 +15,7 @@ public class UserController {
     private UserRepository userRepository;
 
     // 🔐 🔥 CHANGE THIS SECRET (VERY IMPORTANT)
-    private static final String ADMIN_SECRET = "BILLORA_ADMIN_123";
+    private static final String ADMIN_SECRET = "vishwa_super_secret_key_98765";
 
     // ===============================
     // 🔥 REGISTER (CUSTOMER ONLY)
