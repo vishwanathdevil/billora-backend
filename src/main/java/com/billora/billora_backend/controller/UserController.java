@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.billora.billora_backend.config.JwtUtil;
+import com.billora.billora_backend.dto.AuthResponse;
 import com.billora.billora_backend.entity.User;
 import com.billora.billora_backend.repository.UserRepository;
 
@@ -42,7 +44,10 @@ public class UserController {
     // ===============================
     // 🔥 LOGIN
     // ===============================
-    @PostMapping("/login")
+    @Autowired
+private JwtUtil jwtUtil;
+
+@PostMapping("/login")
 public ResponseEntity<?> login(@RequestBody User user) {
 
     if (user.getUsername() == null || user.getPassword() == null) {
@@ -59,7 +64,9 @@ public ResponseEntity<?> login(@RequestBody User user) {
         return ResponseEntity.status(401).body("Invalid password");
     }
 
-    return ResponseEntity.ok(existingUser);
+    String token = jwtUtil.generateToken(existingUser.getUsername());
+
+    return ResponseEntity.ok(new AuthResponse(token, existingUser));
 }
 
     // ===============================
