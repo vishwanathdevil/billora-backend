@@ -13,6 +13,7 @@ public class CartSession {
     private Long id;
 
     private Long storeId;
+    private String status;
     private String createdBy;
 
     // getters & setters
@@ -23,4 +24,7 @@ public class CartSession {
 
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

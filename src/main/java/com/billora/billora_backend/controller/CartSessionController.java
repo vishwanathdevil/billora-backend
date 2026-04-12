@@ -31,4 +31,14 @@ public class CartSessionController {
     public CartSession join(@PathVariable Long id) {
         return repo.findById(id).orElseThrow();
     }
+    @PostMapping("/start")
+public CartSession startSession(@RequestBody CartSession req) {
+
+    CartSession session = repo.findById(req.getId()).orElseThrow();
+
+    session.setStatus("ACTIVE");       // ✅ IMPORTANT
+    session.setStoreId(req.getStoreId()); // ✅ IMPORTANT
+
+    return repo.save(session);
+}
 }
