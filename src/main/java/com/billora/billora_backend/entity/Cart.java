@@ -1,7 +1,12 @@
 package com.billora.billora_backend.entity;
 
-import jakarta.persistence.*;
 import java.util.List;
+
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class Cart {
@@ -11,6 +16,8 @@ public class Cart {
     private Long id;
 
     private String username;
+
+    private Long sessionId;
 
     @ElementCollection
     private List<String> items;
@@ -25,6 +32,9 @@ public class Cart {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+
+    public Long getSessionId() { return sessionId; }
+    public void setSessionId(Long sessionId) { this.sessionId = sessionId; }
 
     public List<String> getItems() { return items; }
     public void setItems(List<String> items) { this.items = items; }
