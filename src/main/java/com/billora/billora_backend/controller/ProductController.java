@@ -20,7 +20,7 @@ public class ProductController {
     private ProductRepository productRepository;
 
     // ===============================
-    // ADD PRODUCT
+    // ADD PRODUCT (ONLY SAVE HERE)
     // ===============================
     @PostMapping("/add")
     public Product addProduct(@RequestBody Product product) {
@@ -43,7 +43,7 @@ public class ProductController {
     }
 
     // ===============================
-    // SCAN PRODUCT (AUTO FETCH)
+    // SCAN PRODUCT (NO SAVE ❌)
     // ===============================
     @GetMapping("/{code}")
     public ResponseEntity<?> getProduct(
@@ -61,7 +61,7 @@ public class ProductController {
                 product = productRepository.findByCodeAndStoreId(normalizedCode, storeId);
             }
 
-            // 2️⃣ EXTERNAL API
+            // 2️⃣ EXTERNAL API (NO SAVE)
             if (product == null) {
                 product = fetchFromOpenFoodFacts(code, storeId);
             }
@@ -69,11 +69,6 @@ public class ProductController {
             // 3️⃣ NOT FOUND
             if (product == null) {
                 return ResponseEntity.status(404).body("Product not found");
-            }
-
-            // 4️⃣ STOCK CHECK
-            if (product.getStock() <= 0) {
-                return ResponseEntity.status(400).body("Out of stock ❌");
             }
 
             return ResponseEntity.ok(product);
@@ -84,7 +79,7 @@ public class ProductController {
     }
 
     // ===============================
-    // 🔥 SINGLE CLEAN API METHOD
+    // 🔥 FETCH ONLY (NO DB SAVE)
     // ===============================
     private Product fetchFromOpenFoodFacts(String code, Long storeId) {
 
@@ -108,11 +103,14 @@ public class ProductController {
             Product p = new Product();
             p.setCode(code);
             p.setName(name != null && !name.isEmpty() ? name : "Unknown Product");
-            p.setPrice(10);   // default price
-            p.setStoreId(storeId);
-            p.setStock(100);  // default stock
 
-            return productRepository.save(p);
+            // ❌ REMOVE DEFAULT PRICE
+            p.setPrice(0);
+
+            p.setStoreId(storeId);
+            p.setStock(0);
+
+            return p; // ✅ ONLY RETURN, NOT SAVE
 
         } catch (Exception e) {
             return null;
