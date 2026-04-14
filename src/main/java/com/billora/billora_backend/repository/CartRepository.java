@@ -6,4 +6,5 @@ import com.billora.billora_backend.entity.Cart;
 public interface CartRepository extends JpaRepository<Cart, Long> {
     // No custom methods needed for basic CRUD
     List<Cart> findBySessionId(Long sessionId);
+    List<Cart> findBySessionIdAndOwner(Long sessionId, String owner);
 }

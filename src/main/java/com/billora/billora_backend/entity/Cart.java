@@ -19,9 +19,10 @@ public class Cart {
     @Column(name = "session_id")
     private Long sessionId;
 
-    private String status;
+    private String role; // MAIN / CHILD
+    private boolean completed; // child completed
 
-    // getters & setters
+    private String status;
 
     public Long getId() { return id; }
 
@@ -42,6 +43,12 @@ public class Cart {
 
     public Long getSessionId() { return sessionId; }
     public void setSessionId(Long sessionId) { this.sessionId = sessionId; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

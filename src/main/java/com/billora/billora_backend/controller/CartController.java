@@ -16,31 +16,65 @@ public class CartController {
     @Autowired
     private CartRepository cartRepository;
 
-    // ADD TO CART
+    // ADD
     @PostMapping
-    public Cart createCart(@RequestBody Cart cart) {
+    public Cart add(@RequestBody Cart cart) {
         cart.setStatus("PENDING");
+        cart.setCompleted(false);
         return cartRepository.save(cart);
     }
 
-    // GET CART
-    @GetMapping("/{sessionId}")
-    public List<Cart> getCartBySession(@PathVariable Long sessionId) {
-        return cartRepository.findBySessionId(sessionId);
+    // GET MAIN CART (ONLY COMPLETED + MAIN)
+    @GetMapping("/main/{sessionId}")
+    public List<Cart> mainCart(@PathVariable Long sessionId) {
+        return cartRepository.findBySessionId(sessionId)
+                .stream()
+                .filter(c -> c.isCompleted() || "MAIN".equals(c.getRole()))
+                .toList();
     }
 
-    // ✅ CLEAR CART (FIXED)
-    @DeleteMapping("/{sessionId}")
-    public String clearCart(@PathVariable Long sessionId) {
+    // GET CHILD CART (OWN ONLY)
+    @GetMapping("/child/{sessionId}/{owner}")
+    public List<Cart> childCart(@PathVariable Long sessionId, @PathVariable String owner) {
+        return cartRepository.findBySessionIdAndOwner(sessionId, owner)
+                .stream()
+                .filter(c -> !c.isCompleted())
+                .toList();
+    }
 
-        List<Cart> cartItems = cartRepository.findBySessionId(sessionId);
+    // COMPLETE CHILD CART
+    @PutMapping("/complete/{sessionId}/{owner}")
+    public String complete(@PathVariable Long sessionId, @PathVariable String owner) {
 
-        if (cartItems.isEmpty()) {
-            return "Cart already empty";
+        List<Cart> items = cartRepository.findBySessionIdAndOwner(sessionId, owner);
+
+        for (Cart c : items) {
+            c.setCompleted(true);
+            cartRepository.save(c);
         }
 
-        cartRepository.deleteAll(cartItems);
+        return "Moved to main cart";
+    }
 
-        return "Cart cleared successfully";
+    // UPDATE QTY
+    @PutMapping("/update/{id}/{qty}")
+    public Cart update(@PathVariable Long id, @PathVariable int qty) {
+        Cart c = cartRepository.findById(id).get();
+        c.setQuantity(qty);
+        return cartRepository.save(c);
+    }
+
+    // DELETE ITEM
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Long id) {
+        cartRepository.deleteById(id);
+        return "Deleted";
+    }
+
+    // CLEAR AFTER PAYMENT
+    @DeleteMapping("/session/{sessionId}")
+    public String clear(@PathVariable Long sessionId) {
+        cartRepository.deleteAll(cartRepository.findBySessionId(sessionId));
+        return "Cleared";
     }
 }
