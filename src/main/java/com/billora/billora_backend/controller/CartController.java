@@ -35,12 +35,17 @@ public class CartController {
 
     // GET CHILD CART (OWN ONLY)
     @GetMapping("/child/{sessionId}/{owner}")
-    public List<Cart> childCart(@PathVariable Long sessionId, @PathVariable String owner) {
-        return cartRepository.findBySessionIdAndOwner(sessionId, owner)
-                .stream()
-                .filter(c -> !c.isCompleted())
-                .toList();
+public List<Cart> childCart(@PathVariable Long sessionId, @PathVariable String owner) {
+
+    if (owner == null || owner.equals("null")) {
+        return List.of(); // ✅ prevent crash
     }
+
+    return cartRepository.findBySessionIdAndOwner(sessionId, owner)
+            .stream()
+            .filter(c -> !c.isCompleted())
+            .toList();
+}
 
     // COMPLETE CHILD CART
     @PutMapping("/complete/{sessionId}/{owner}")
