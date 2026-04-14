@@ -16,23 +16,31 @@ public class CartController {
     @Autowired
     private CartRepository cartRepository;
 
-    // 1️⃣ ADD PRODUCT TO CART
+    // ADD TO CART
     @PostMapping
     public Cart createCart(@RequestBody Cart cart) {
         cart.setStatus("PENDING");
         return cartRepository.save(cart);
     }
 
-    // 2️⃣ GET CART BY SESSION (🔥 FIXED)
+    // GET CART
     @GetMapping("/{sessionId}")
     public List<Cart> getCartBySession(@PathVariable Long sessionId) {
+        return cartRepository.findBySessionId(sessionId);
+    }
+
+    // ✅ CLEAR CART (FIXED)
+    @DeleteMapping("/{sessionId}")
+    public String clearCart(@PathVariable Long sessionId) {
 
         List<Cart> cartItems = cartRepository.findBySessionId(sessionId);
 
         if (cartItems.isEmpty()) {
-            throw new RuntimeException("No cart items found");
+            return "Cart already empty";
         }
 
-        return cartItems; // ✅ returns array
+        cartRepository.deleteAll(cartItems);
+
+        return "Cart cleared successfully";
     }
 }

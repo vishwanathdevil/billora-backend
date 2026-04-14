@@ -1,12 +1,6 @@
 package com.billora.billora_backend.entity;
 
-import java.util.List;
-
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Cart {
@@ -16,19 +10,18 @@ public class Cart {
     private Long id;
 
     private String username;
-
     private Long sessionId;
 
-    @ElementCollection
-    private List<String> items;
+    private String name;
+    private String code;
+    private double price;
+    private int quantity;
+    private String owner;
 
     private Double total;
+    private String status;
 
-    private String status; // PENDING, PAID
-
-    // getters & setters
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
@@ -36,8 +29,20 @@ public class Cart {
     public Long getSessionId() { return sessionId; }
     public void setSessionId(Long sessionId) { this.sessionId = sessionId; }
 
-    public List<String> getItems() { return items; }
-    public void setItems(List<String> items) { this.items = items; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
+
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    public String getOwner() { return owner; }
+    public void setOwner(String owner) { this.owner = owner; }
 
     public Double getTotal() { return total; }
     public void setTotal(Double total) { this.total = total; }
