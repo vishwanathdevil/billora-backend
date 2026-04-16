@@ -47,7 +47,7 @@ public class CartController {
     public List<Cart> mainCart(@PathVariable Long sessionId) {
         return cartRepository.findBySessionId(sessionId)
                 .stream()
-                .filter(c -> c.isCompleted())
+                .filter(c -> c.isCompleted() || "MAIN".equals(c.getRole()))
                 .toList();
     }
 
