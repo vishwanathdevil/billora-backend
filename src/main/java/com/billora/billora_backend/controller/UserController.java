@@ -64,11 +64,13 @@ public ResponseEntity<?> login(@RequestBody User user) {
         return ResponseEntity.status(401).body("Invalid password");
     }
 
-    String token = jwtUtil.generateToken(existingUser.getUsername());
+    // ✅ TEMP TOKEN
+    String fakeToken = "billora-token";
 
-    return ResponseEntity.ok(new AuthResponse(token, existingUser));
+    return ResponseEntity.ok(
+        new AuthResponse(fakeToken, existingUser)
+    );
 }
-
     // ===============================
     // 🔐 🔥 CREATE ADMIN / CASHIER (PROTECTED)
     // ===============================
