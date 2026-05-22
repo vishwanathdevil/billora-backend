@@ -60,7 +60,7 @@ public ResponseEntity<?> register(@RequestBody User user) {
     // ===============================
     // 🔥 LOGIN
     // ===============================
-    @Autowired
+    // @Autowired
 // private JwtUtil jwtUtil;
 
 @PostMapping("/login")
