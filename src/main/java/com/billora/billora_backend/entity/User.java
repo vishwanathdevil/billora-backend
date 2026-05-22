@@ -11,8 +11,8 @@ public class User {
     private Long id;
 
     // ✅ FIXED (REMOVE quotes)
-    @Column(name = "username")
-    private String username;
+@Column(name = "username", unique = true, nullable = false)
+private String username;
 
     @Column(name = "password")
     private String password;

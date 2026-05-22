@@ -29,17 +29,33 @@ public class UserController {
     // 🔥 REGISTER (CUSTOMER ONLY)
     // ===============================
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
+public ResponseEntity<?> register(@RequestBody User user) {
 
-        if (user == null || user.getUsername() == null || user.getPassword() == null) {
-            throw new RuntimeException("Invalid input");
-        }
+    if (user == null ||
+        user.getUsername() == null ||
+        user.getPassword() == null ||
+        user.getUsername().trim().isEmpty() ||
+        user.getPassword().trim().isEmpty()) {
 
-        // 🚫 FORCE CUSTOMER ROLE ONLY
-        user.setRole("CUSTOMER");
-
-        return userRepository.save(user);
+        return ResponseEntity.badRequest().body("Invalid input");
     }
+
+    // ✅ CHECK DUPLICATE USERNAME
+    User existing = userRepository.findByUsername(user.getUsername());
+
+    if (existing != null) {
+        return ResponseEntity
+                .badRequest()
+                .body("Username already exists ❌");
+    }
+
+    // ✅ FORCE CUSTOMER ROLE
+    user.setRole("CUSTOMER");
+
+    User saved = userRepository.save(user);
+
+    return ResponseEntity.ok(saved);
+}
 
     // ===============================
     // 🔥 LOGIN
