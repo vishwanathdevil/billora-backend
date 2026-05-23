@@ -14,65 +14,64 @@ import com.billora.billora_backend.repository.CartRepository;
 public class CartController {
 
     @Autowired
-    private CartRepository cartRepository;
+    private CartRepository cartRepo;
 
     // ===============================
-    // ADD ITEM
+    // ADD TO CART
     // ===============================
     @PostMapping
-    public Cart add(@RequestBody Cart cart) {
+    public Cart addToCart(@RequestBody Cart cart) {
 
-        if (cart.getQuantity() <= 0) {
-            cart.setQuantity(1);
-        }
-
-        return cartRepository.save(cart);
+        return cartRepo.save(cart);
     }
 
     // ===============================
     // GET USER CART
     // ===============================
-    @GetMapping("/user/{owner}")
-    public List<Cart> getUserCart(@PathVariable String owner) {
+    @GetMapping("/user/{username}")
+    public List<Cart> getUserCart(
+            @PathVariable String username
+    ) {
 
-        return cartRepository.findByOwner(owner);
+        return cartRepo.findByOwner(username);
     }
 
     // ===============================
     // UPDATE QUANTITY
     // ===============================
     @PutMapping("/update/{id}/{qty}")
-    public Cart update(@PathVariable Long id,
-                       @PathVariable int qty) {
+    public Cart updateQuantity(
+            @PathVariable Long id,
+            @PathVariable int qty
+    ) {
 
-        Cart cart = cartRepository.findById(id).orElseThrow();
+        Cart cart = cartRepo.findById(id).orElseThrow();
 
         cart.setQuantity(qty);
 
-        return cartRepository.save(cart);
+        return cartRepo.save(cart);
     }
 
     // ===============================
     // DELETE ITEM
     // ===============================
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id) {
+    public void deleteItem(@PathVariable Long id) {
 
-        cartRepository.deleteById(id);
-
-        return "Deleted";
+        cartRepo.deleteById(id);
     }
 
     // ===============================
     // CLEAR USER CART
     // ===============================
-    @DeleteMapping("/user/{owner}")
-    public String clearUserCart(@PathVariable String owner) {
+    @DeleteMapping("/user/{username}")
+    public void clearUserCart(
+            @PathVariable String username
+    ) {
 
-        cartRepository.deleteAll(
-                cartRepository.findByOwner(owner)
-        );
+        List<Cart> items =
+                cartRepo.findByOwner(username);
 
-        return "Cart cleared";
+        cartRepo.deleteAll(items);
     }
 }
