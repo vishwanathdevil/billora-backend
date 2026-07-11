@@ -22,9 +22,15 @@ public class StoreController {
         return storeRepository.findAll();
     }
 
-    // ✅ ADD STORE (optional)
+    // ✅ ADD SINGLE STORE
     @PostMapping
     public Store addStore(@RequestBody Store store) {
         return storeRepository.save(store);
     }
-}
+
+    // ✅ ADD MULTIPLE STORES AT ONCE
+    @PostMapping("/bulk")
+    public List<Store> addStores(@RequestBody List<Store> stores) {
+        return storeRepository.saveAll(stores);
+    }
+}
