@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,13 +33,18 @@ public class CartSessionController {
         return repo.findById(id).orElseThrow();
     }
     @PostMapping("/start")
-public CartSession startSession(@RequestBody CartSession req) {
+    public CartSession startSession(@RequestBody CartSession req) {
+        CartSession session = repo.findById(req.getId()).orElseThrow();
+        session.setStatus("ACTIVE");       // ✅ IMPORTANT
+        session.setStoreId(req.getStoreId()); // ✅ IMPORTANT
+        return repo.save(session);
+    }
 
-    CartSession session = repo.findById(req.getId()).orElseThrow();
-
-    session.setStatus("ACTIVE");       // ✅ IMPORTANT
-    session.setStoreId(req.getStoreId()); // ✅ IMPORTANT
-
-    return repo.save(session);
-}
+    // 🔴 UPDATE SESSION STATUS
+    @PutMapping("/{id}/status/{status}")
+    public CartSession updateStatus(@PathVariable Long id, @PathVariable String status) {
+        CartSession session = repo.findById(id).orElseThrow();
+        session.setStatus(status);
+        return repo.save(session);
+    }
 }

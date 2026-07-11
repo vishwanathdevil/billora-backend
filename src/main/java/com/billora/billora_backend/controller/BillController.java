@@ -61,20 +61,26 @@ public class BillController {
     }
 
     @PutMapping("/{id}/pay/{mode}")
-public Bill payBill(@PathVariable Long id, @PathVariable String mode) {
+    public Bill payBill(@PathVariable Long id, @PathVariable String mode) {
+        Bill bill = billRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bill not found"));
+        bill.setStatus("PAID");
+        bill.setPaymentMode(mode);
+        Bill updated = billRepository.save(bill);
+        messagingTemplate.convertAndSend("/topic/bills", updated);
+        return updated;
+    }
 
-    Bill bill = billRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Bill not found"));
-
-    bill.setStatus("PAID");
-    bill.setPaymentMode(mode);
-
-    Bill updated = billRepository.save(bill);
-
-    messagingTemplate.convertAndSend("/topic/bills", updated);
-
-    return updated;
-}
+    // 🔴 CANCEL BILL
+    @PutMapping("/{id}/cancel")
+    public Bill cancelBill(@PathVariable Long id) {
+        Bill bill = billRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bill not found"));
+        bill.setStatus("CANCELLED");
+        Bill updated = billRepository.save(bill);
+        messagingTemplate.convertAndSend("/topic/bills", updated);
+        return updated;
+    }
 
     // ✅ GET BILL BY ID
     @GetMapping("/id/{id}")
