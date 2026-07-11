@@ -74,4 +74,24 @@ public class CartController {
 
         cartRepo.deleteAll(items);
     }
+    
+    // ===============================
+    // GET SESSION CART
+    // ===============================
+    @GetMapping("/session/{sessionId}")
+    public List<Cart> getSessionCart(
+            @PathVariable Long sessionId
+    ) {
+        return cartRepo.findBySessionId(sessionId);
+    }
+    
+    // ===============================
+    // CLEAR SESSION CART
+    // ===============================
+    @DeleteMapping("/session/{sessionId}")
+    public void clearSessionCart(
+            @PathVariable Long sessionId
+    ) {
+        cartRepo.deleteBySessionId(sessionId);
+    }
 }
