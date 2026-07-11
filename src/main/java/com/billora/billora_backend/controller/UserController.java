@@ -117,6 +117,11 @@ public class UserController {
             return ResponseEntity.status(401).body("User not found");
         }
 
+        // 🛑 CUSTOMER MUST USE OTP REGISTER PAGE TO RESTORE
+        if ("CUSTOMER".equals(existingUser.getRole())) {
+            return ResponseEntity.status(401).body("Please use the Register page to verify your mobile number and restore your account 📱");
+        }
+
         if (!existingUser.getPassword().equals(user.getPassword())) {
             return ResponseEntity.status(401).body("Invalid password");
         }
