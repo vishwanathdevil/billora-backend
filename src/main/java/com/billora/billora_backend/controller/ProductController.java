@@ -48,7 +48,8 @@ public class ProductController {
     @GetMapping("/{code}")
     public ResponseEntity<?> getProduct(
             @PathVariable String code,
-            @RequestParam Long storeId) {
+            @RequestParam Long storeId,
+            @RequestParam(required = false, defaultValue = "customer") String source) {
 
         try {
 
@@ -61,8 +62,8 @@ public class ProductController {
                 product = productRepository.findByCodeAndStoreId(normalizedCode, storeId);
             }
 
-            // 2️⃣ EXTERNAL API (NO SAVE)
-            if (product == null) {
+            // 2️⃣ EXTERNAL API (ONLY FOR ADMIN)
+            if (product == null && "admin".equalsIgnoreCase(source)) {
                 product = fetchFromOpenFoodFacts(code, storeId);
             }
 
