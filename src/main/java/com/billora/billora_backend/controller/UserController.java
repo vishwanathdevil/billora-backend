@@ -17,6 +17,7 @@ import java.util.Map;
 import com.billora.billora_backend.dto.AuthResponse;
 import com.billora.billora_backend.entity.User;
 import com.billora.billora_backend.repository.UserRepository;
+import com.billora.billora_backend.service.OtpService;
 
 @RestController
 @RequestMapping("/api/users")
@@ -29,35 +30,68 @@ public class UserController {
     // 🔐 🔥 CHANGE THIS SECRET (VERY IMPORTANT)
     private static final String ADMIN_SECRET = "vishwa_super_secret_key_98765";
 
+    @Autowired
+    private OtpService otpService;
+
     // ===============================
-    // 🔥 REGISTER (CUSTOMER ONLY)
+    // 🔥 SEND OTP
+    // ===============================
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
+        String number = request.get("number");
+        if (number == null || number.isEmpty()) {
+            return ResponseEntity.badRequest().body("Mobile number is required");
+        }
+
+        String generatedOtp = otpService.generateAndSendOtp(number);
+        
+        // Return OTP to the frontend for easy testing since real SMS needs real credentials
+        return ResponseEntity.ok(Map.of(
+            "message", "OTP sent successfully",
+            "otp", generatedOtp
+        ));
+    }
+
+    // ===============================
+    // 🔥 REGISTER OR RESTORE
     // ===============================
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody Map<String, String> payload) {
 
-        if (user == null ||
-            user.getUsername() == null ||
-            user.getPassword() == null ||
-            user.getUsername().trim().isEmpty() ||
-            user.getPassword().trim().isEmpty()) {
+        String number = payload.get("number");
+        String otp = payload.get("otp");
+        String username = payload.get("username");
+        String password = payload.get("password");
+        String name = payload.get("name");
+        String email = payload.get("email");
 
-            return ResponseEntity.badRequest().body("Invalid input");
+        if (number == null || otp == null || username == null || password == null) {
+            return ResponseEntity.badRequest().body("Missing required fields");
         }
 
-        // ✅ CHECK DUPLICATE USERNAME
-        User existing = userRepository.findByUsername(user.getUsername());
-
-        if (existing != null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Username already exists ❌");
+        // ✅ VERIFY OTP
+        if (!otpService.verifyOtp(number, otp)) {
+            return ResponseEntity.status(401).body("Invalid or expired OTP ❌");
         }
 
-        // ✅ FORCE CUSTOMER ROLE
-        user.setRole("CUSTOMER");
+        // ✅ CHECK IF USER ALREADY EXISTS (RESTORE ACCOUNT)
+        User existingUser = userRepository.findByNumber(number);
 
-        User saved = userRepository.save(user);
+        if (existingUser != null) {
+            // Restore existing user!
+            return ResponseEntity.ok(existingUser);
+        }
 
+        // ✅ CREATE NEW USER
+        User newUser = new User();
+        newUser.setUsername(username);
+        newUser.setPassword(password);
+        newUser.setNumber(number);
+        newUser.setName(name);
+        newUser.setEmail(email);
+        newUser.setRole("CUSTOMER");
+
+        User saved = userRepository.save(newUser);
         return ResponseEntity.ok(saved);
     }
 

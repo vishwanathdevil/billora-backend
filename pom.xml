@@ -87,6 +87,13 @@
             <version>1.4.3</version>
         </dependency>
 
+        <!-- TWILIO FOR OTP -->
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>9.13.0</version>
+        </dependency>
+
         <!-- JSON -->
         <dependency>
             <groupId>org.json</groupId>

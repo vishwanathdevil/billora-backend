@@ -11,11 +11,20 @@ public class User {
     private Long id;
 
     // ✅ FIXED (REMOVE quotes)
-@Column(name = "username", unique = true, nullable = false)
-private String username;
+    @Column(name = "username", unique = true, nullable = false)
+    private String username;
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "number", unique = true)
+    private String number;
+
+    @Column(name = "email")
+    private String email;
 
     @Column(name = "role")
     private String role;
@@ -61,5 +70,29 @@ private String username;
 
     public void setStoreId(Long storeId) {
         this.storeId = storeId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
