@@ -1,53 +1,48 @@
 -- ================================================
 -- 🌱 BILLORA SEED DATA
--- Runs automatically on every startup.
--- Uses ON CONFLICT DO NOTHING → safe to run multiple times.
--- Add your stores, users, and products here.
+-- Correct table names (matching JPA entity @Table annotations):
+--   Store entity  → table: "stores"
+--   User entity   → table: "users"
+--   Product entity → table: "products"
+--
+-- HOW TO USE:
+-- Enable in application.properties by adding:
+--   spring.sql.init.mode=always
+--   spring.jpa.defer-datasource-initialization=true
+--
+-- ⚠️ Currently DISABLED (use /api/stores/bulk and /api/users/bulk instead)
 -- ================================================
+
+-- ================================================
+-- 🏪 STORES (table name = "stores")
+-- ================================================
+-- INSERT INTO stores (name)
+-- VALUES
+--   ('D-Mart'),
+--   ('Reliance Fresh'),
+--   ('More Supermarket'),
+--   ('BigBazaar'),
+--   ('Spencers')
+-- ON CONFLICT DO NOTHING;
 
 
 -- ================================================
--- 🏪 STORES
+-- 👤 USERS (table name = "users")
 -- ================================================
-INSERT INTO store (id, name)
-VALUES
-  (1, 'Billora Store 1'),
-  (2, 'Billora Store 2')
-ON CONFLICT (id) DO NOTHING;
+-- INSERT INTO users (username, password, role, store_id)
+-- VALUES
+--   ('dmart_admin',       'dmart@admin123',    'ADMIN',   1),
+--   ('dmart_cashier',     'dmart@cash123',     'CASHIER', 1),
+--   ('reliance_admin',    'reliance@admin123', 'ADMIN',   2),
+--   ('reliance_cashier',  'reliance@cash123',  'CASHIER', 2)
+-- ON CONFLICT (username) DO NOTHING;
 
 
 -- ================================================
--- 👤 USERS (ADMIN + CASHIER)
--- Add all your admins and cashiers here.
--- Customers register themselves — no need to add them.
+-- 📦 PRODUCTS (table name = "products")
 -- ================================================
-INSERT INTO users (username, password, role, store_id)
-VALUES
-  ('admin1',   'your_admin_password',   'ADMIN',   1),
-  ('cashier1', 'your_cashier_password', 'CASHIER', 1),
-  ('admin2',   'your_admin_password',   'ADMIN',   2),
-  ('cashier2', 'your_cashier_password', 'CASHIER', 2)
-ON CONFLICT (username) DO NOTHING;
-
-
--- ================================================
--- 📦 PRODUCTS (Store 1)
--- Add all your products here.
--- Format: (name, code, price, stock, store_id)
--- ================================================
-INSERT INTO product (name, code, price, stock, store_id)
-VALUES
-  ('Product A', 'PROD001', 50,  100, 1),
-  ('Product B', 'PROD002', 120, 50,  1),
-  ('Product C', 'PROD003', 200, 75,  1)
-ON CONFLICT DO NOTHING;
-
-
--- ================================================
--- 📦 PRODUCTS (Store 2)
--- ================================================
-INSERT INTO product (name, code, price, stock, store_id)
-VALUES
-  ('Item X', 'ITEM001', 80,  60, 2),
-  ('Item Y', 'ITEM002', 150, 40, 2)
-ON CONFLICT DO NOTHING;
+-- INSERT INTO products (name, code, price, stock, store_id)
+-- VALUES
+--   ('Product A', 'PROD001', 50, 100, 1),
+--   ('Product B', 'PROD002', 120, 50, 1)
+-- ON CONFLICT DO NOTHING;
