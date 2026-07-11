@@ -32,17 +32,16 @@ public class BillController {
     public Bill saveBill(@RequestBody Bill bill) {
         bill.setStatus("PENDING");
 
-// 🔥 Calculate total safely
-double total = 0;
-if (bill.getItems() != null) {
-    for (var item : bill.getItems()) {
-        total += item.getPrice() * item.getQuantity();
-    }
-}
+        // 🔥 Calculate total safely only if items are present
+        if (bill.getItems() != null && !bill.getItems().isEmpty()) {
+            double total = 0;
+            for (var item : bill.getItems()) {
+                total += item.getPrice() * item.getQuantity();
+            }
+            bill.setTotal(total);
+        }
 
-bill.setTotal(total);
-
-return billRepository.save(bill);
+        return billRepository.save(bill);
     }
 
     // ✅ START PAYMENT
