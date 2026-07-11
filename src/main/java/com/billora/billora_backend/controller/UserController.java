@@ -82,6 +82,12 @@ public class UserController {
             return ResponseEntity.ok(existingUser);
         }
 
+        // ✅ CHECK DUPLICATE USERNAME
+        User existingUsername = userRepository.findByUsername(username);
+        if (existingUsername != null) {
+            return ResponseEntity.badRequest().body("Username is already taken by another account ❌");
+        }
+
         // ✅ CREATE NEW USER
         User newUser = new User();
         newUser.setUsername(username);
