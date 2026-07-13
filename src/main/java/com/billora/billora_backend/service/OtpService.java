@@ -17,8 +17,16 @@ public class OtpService {
     private static final String TWILIO_AUTH_TOKEN = "replace_with_your_auth_token";
     private static final String TWILIO_PHONE_NUMBER = "+1234567890"; // Replace with your Twilio number
 
-    // In-memory store for OTPs: Map<MobileNumber, OTP>
-    private final Map<String, String> otpStore = new ConcurrentHashMap<>();
+    // In-memory store for OTPs: Map<MobileNumber, OtpData>
+    private static class OtpData {
+        String otp;
+        long expiryTime;
+        OtpData(String otp, long expiryTime) {
+            this.otp = otp;
+            this.expiryTime = expiryTime;
+        }
+    }
+    private final Map<String, OtpData> otpStore = new ConcurrentHashMap<>();
 
     public OtpService() {
         // Initialize Twilio ONLY if credentials are provided to avoid crashing on boot
@@ -31,9 +39,11 @@ public class OtpService {
         // Generate 4-digit OTP
         String otp = String.format("%04d", new Random().nextInt(10000));
         
-        otpStore.put(mobileNumber, otp);
+        // Expiry in 3 minutes (180,000 milliseconds)
+        long expiry = System.currentTimeMillis() + 3 * 60 * 1000;
+        otpStore.put(mobileNumber, new OtpData(otp, expiry));
 
-        String msgBody = "Your Billora OTP is: " + otp + ". Do not share this with anyone.";
+        String msgBody = "Your Billora OTP is: " + otp + ". Do not share this with anyone. It expires in 3 minutes.";
 
         try {
             if (!TWILIO_ACCOUNT_SID.startsWith("AC_replace")) {
@@ -55,10 +65,15 @@ public class OtpService {
     }
 
     public boolean verifyOtp(String mobileNumber, String otp) {
-        String storedOtp = otpStore.get(mobileNumber);
-        if (storedOtp != null && storedOtp.equals(otp)) {
-            otpStore.remove(mobileNumber); // OTP used
-            return true;
+        OtpData data = otpStore.get(mobileNumber);
+        if (data != null && data.otp.equals(otp)) {
+            if (System.currentTimeMillis() <= data.expiryTime) {
+                otpStore.remove(mobileNumber); // OTP used
+                return true;
+            } else {
+                otpStore.remove(mobileNumber); // Expired OTP removed
+                return false;
+            }
         }
         return false;
     }
