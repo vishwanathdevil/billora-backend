@@ -74,18 +74,32 @@ public class UserController {
             return ResponseEntity.status(401).body("Invalid or expired OTP ❌");
         }
 
-        // ✅ CHECK IF USER ALREADY EXISTS (RESTORE ACCOUNT)
+        // ✅ CHECK IF USER ALREADY EXISTS (RESTORE ACCOUNT vs DUPLICATE)
         User existingUser = userRepository.findByNumber(number);
 
         if (existingUser != null) {
-            // Restore existing user!
-            return ResponseEntity.ok(existingUser);
+            // Check if they are trying to restore their own account
+            // If they know the exact username and password associated with this number, allow restore
+            if (existingUser.getUsername().equals(username) && 
+                existingUser.getPassword().equals(password)) {
+                return ResponseEntity.ok(existingUser); // RESTORE ACCOUNT
+            } else {
+                return ResponseEntity.badRequest().body("Number is already registered to another user ❌");
+            }
         }
 
         // ✅ CHECK DUPLICATE USERNAME
         User existingUsername = userRepository.findByUsername(username);
         if (existingUsername != null) {
             return ResponseEntity.badRequest().body("Username is already taken by another account ❌");
+        }
+
+        // ✅ CHECK DUPLICATE EMAIL
+        if (email != null && !email.trim().isEmpty()) {
+            User existingEmail = userRepository.findByEmail(email);
+            if (existingEmail != null) {
+                return ResponseEntity.badRequest().body("Email is already in use ❌");
+            }
         }
 
         // ✅ CREATE NEW USER
